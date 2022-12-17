@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/pojiang20/distribute-object-storage/data_server/heartbeat"
 	"github.com/pojiang20/distribute-object-storage/data_server/locate"
-	"github.com/pojiang20/distribute-object-storage/objects"
+	"github.com/pojiang20/distribute-object-storage/data_server/objects"
 	"log"
 	"net/http"
 	"os"
