@@ -48,3 +48,13 @@ mkdir /tmp/objects
 接口服务和数据服务的objects/heartbeat/locate三个包有很大区别。
 数据服务中，objects包负责对象在本地的存取；heartbeat发送心跳消息；locate包用于接收定位消息、定位对象以及发送反馈消息
 接口服务中，objects包负责将对象请求转发给数据服务；heartbeat包用于接收数据服务节点的心跳；locate包用于发送定位消息并处理反馈消息
+
+#### rabbitmq的安装和使用
+brew install rabbitmq
+打开`cd /usr/local/Cellar/rabbitmq/版本号/sbin/`，运行`rabbitmq-server`启动服务
+开启插件 `./rabbitmq-plugins enable rabbitmq_management`(关闭插件 `sudo ./rabbitmq-plugins disable rabbitmq_management`)，输入` http://localhost:15672/#/ `登录即可。
+可以在网页中添加exchange
+
+添加用户并配置权限
+sudo ./rabbitmqctl add_user test test
+sudo ./rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
