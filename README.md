@@ -58,3 +58,21 @@ brew install rabbitmq
 添加用户并配置权限
 sudo ./rabbitmqctl add_user test test
 sudo ./rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+
+
+#### 测试
+for i in `seq 1 6`; do sudo ifconfig en0 alias 10.29.1.$i/16 255.255.255.0; done
+
+可以通过 `ping 10.29.1.2/16` 来检测
+sudo ifconfig en0 -alias 10.29.1.1 可以删除别名
+
+cd /tmp/stg
+创建文件 for i in `seq 1 6`; do mkdir -p /tmp/stg/$i/objects; done
+
+export RABBITMQ_SERVER=amqp://test:test@localhost:5672
+for i in `seq 1 6`; do LISTEN_ADDRESS=10.29.1.$i:12345 STORAGE_ROOT=/tmp/stg/$i go run ./data_server/data_server.go &; done
+
+for i in `seq 1 2`; do sudo ifconfig en0 alias 10.29.2.$i/16 255.255.255.0; done
+for i in `seq 1 2`; do LISTEN_ADDRESS=10.29.2.$i:12345 go run ./api_server/api_server.go &; done
+
+curl -v http://10.29.2.2:12345/objects/test2 -XPUT -d "this is object test2"

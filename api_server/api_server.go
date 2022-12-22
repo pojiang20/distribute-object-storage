@@ -1,4 +1,4 @@
-package api_server
+package main
 
 import (
 	"github.com/pojiang20/distribute-object-storage/api_server/heartbeat"
