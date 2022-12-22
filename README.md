@@ -76,3 +76,12 @@ for i in `seq 1 2`; do sudo ifconfig en0 alias 10.29.2.$i/16 255.255.255.0; done
 for i in `seq 1 2`; do LISTEN_ADDRESS=10.29.2.$i:12345 go run ./api_server/api_server.go &; done
 
 curl -v http://10.29.2.2:12345/objects/test2 -XPUT -d "this is object test2"
+
+#### 项目结构
+![img.png](img.png)
+项目结构如图，使用rabbitMQ进行一对多的广播是关键。apiServer需要读取对象时，向所有dataServer广播，只有存在对象的dataServer节点发送响应。dataServer通过广播向所有apiServer发送心跳，告知它们自己服务可用。
+
+#### 数据流
+项目中的数据流处理很巧妙，好处就是，从apiServer获取的put请求一直到apiServer发送请求给dataServer这个过程，都没有存储过数据，而是一个个读写接口传递，最后传递给httpRequest中的io.reader。这样即使传输内容非常大。
+apiServer端也不会收到影响。
+这里是关系是：request.Body实现了io.reader（A），且io.Pipe返回了writer（B）和reader（C）。io.copy将A的内容写入B，pipe会将B的内容写入C，C作为io.reader直接放到HttpRequest中发送。
