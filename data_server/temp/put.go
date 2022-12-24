@@ -1,7 +1,7 @@
 package temp
 
 import (
-	"github.com/pojiang20/distribute-object-storage/api_server/locate"
+	"github.com/pojiang20/distribute-object-storage/data_server/locate"
 	"github.com/pojiang20/distribute-object-storage/src/utils"
 	"log"
 	"net/http"
