@@ -17,7 +17,8 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	respCode, err := storeObject(r.Body, url.PathEscape(hash))
+	size := utils.GetSizeFromHeader(r.Header)
+	respCode, err := storeObject(r.Body, url.PathEscape(hash), size)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(respCode)
@@ -27,7 +28,6 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	name := utils.GetObjectName(r.URL.EscapedPath())
-	size := utils.GetSizeFromHeader(r.Header)
 	err = es.AddVersion(name, size, hash)
 	if err != nil {
 		log.Println(err)

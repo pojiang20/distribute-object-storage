@@ -27,9 +27,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-//func Exist(name string) bool {
-//	return Locate(name) != ""
-//}
+func Exist(name string) bool {
+	return Locate(name) != ""
+}
 
 func Locate(name string) string {
 	mq := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))

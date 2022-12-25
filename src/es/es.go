@@ -102,10 +102,6 @@ func GetMetadatta(name string, version int) (Metadata, error) {
 }
 
 func PutMetadata(name string, version int, size int64, hash string) error {
-	if metadataExists(name, version, size, hash) {
-		return PutMetadata(name, version+1, size, hash)
-	}
-
 	metadata := Metadata{
 		Name:    name,
 		Version: version,
