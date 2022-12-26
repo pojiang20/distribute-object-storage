@@ -22,16 +22,16 @@ var (
 )
 
 func getEsClient(esServer string) *elastic.Client {
-	if s, ok := serverEsClientMap[esServer]; ok {
-		return s
+	if serverEsClientMap[esServer] != nil {
+		return serverEsClientMap[esServer]
 	}
-	newCli, err := elastic.NewClient()
+	newClient, err := elastic.NewClient()
 	if err != nil {
 		log.Printf("ES Error: failed to new es client for server [%s]\n, details: %s\n", esServer, err.Error())
 		return nil
 	}
-	serverEsClientMap[esServer] = newCli
-	return newCli
+	serverEsClientMap[esServer] = newClient
+	return newClient
 }
 
 func metadataExists(name string, version int, size int64, hash string) bool {
@@ -93,10 +93,10 @@ func SearchLatestVersion(name string) (metadata Metadata, err error) {
 	return
 }
 
-func GetMetadatta(name string, version int) (Metadata, error) {
-	//未指定版本则返回最新
+func GetMetadata(name string, version int) (Metadata, error) {
+	// version一般至少从1开始，若为0则说明未指定特定版本，默认返回最新版本
 	if version == 0 {
-		SearchLatestVersion(name)
+		return SearchLatestVersion(name)
 	}
 	return getMetadata(name, version)
 }
@@ -115,6 +115,7 @@ func PutMetadata(name string, version int, size int64, hash string) error {
 		BodyJson(metadata).
 		Refresh("wait_for").
 		Do(context.Background())
+	// 注意：在put后，没有进行冲突校验，因为不知道如何使用elastic包校验冲突（手动捂脸）
 	return err
 }
 

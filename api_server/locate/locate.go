@@ -2,7 +2,6 @@ package locate
 
 import (
 	"encoding/json"
-	"github.com/pojiang20/distribute-object-storage/src/err_utils"
 	"github.com/pojiang20/distribute-object-storage/src/rabbitmq"
 	"github.com/pojiang20/distribute-object-storage/src/utils"
 	"log"
@@ -43,8 +42,11 @@ func Locate(name string) string {
 		mq.Close()
 	}()
 	msg := <-c
-	res, err := strconv.Unquote(string(msg.Body))
-	err_utils.Panic_NonNilErr(err)
-	log.Printf("INFO: object at server '%s'\n", res)
+	res, _ := strconv.Unquote(string(msg.Body))
+	if res != "" {
+		log.Printf("INFO: object [%s] at server '%s'\n", name, res)
+	} else {
+		log.Printf("INFO: object [%s] not found\n", name)
+	}
 	return res
 }

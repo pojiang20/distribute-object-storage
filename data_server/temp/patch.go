@@ -21,8 +21,9 @@ func patch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//info存放了元数据、dat存放了对象内容数据
-	infoFile := path.Join(os.Getenv("STORAGE_ROOT"), "tmp", uuid)
+	infoFile := path.Join(os.Getenv("STORAGE_ROOT"), "temp", uuid)
 	datFile := infoFile + ".dat"
+	log.Printf("patch: infoFile[%s],dataFile[%s]", infoFile, datFile)
 	f, err := os.OpenFile(datFile, os.O_WRONLY|os.O_APPEND, 0)
 	if err != nil {
 		log.Println(err)
@@ -43,9 +44,9 @@ func patch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	actualSize := info.Size()
-	if actualSize > tempinfo.Size {
-		os.Remove(datFile)
-		os.Remove(infoFile)
+	if actualSize != tempinfo.Size {
+		//os.Remove(datFile)
+		//os.Remove(infoFile)
 		log.Printf("acutal size %d,not equal %d\n", actualSize, tempinfo.Size)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -59,7 +60,7 @@ func readFromFile(uuid string) (*tempInfo, error) {
 	}
 	defer f.Close()
 	b, _ := io.ReadAll(f)
-	var info tempInfo
+	var info *tempInfo
 	json.Unmarshal(b, &info)
-	return &info, nil
+	return info, nil
 }

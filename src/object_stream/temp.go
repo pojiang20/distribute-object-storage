@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"path"
 	"strings"
 )
 
@@ -16,7 +15,7 @@ type TempPutStream struct {
 
 func NewTempPutStream(server, objectName string, size int64) (*TempPutStream, error) {
 	//创建临时对象
-	req, err := http.NewRequest(http.MethodPost, path.Join("http://", server, "temp", objectName), nil)
+	req, err := http.NewRequest(http.MethodPost, "http://"+server+"/temp/"+objectName, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +41,7 @@ func NewTempPutStream(server, objectName string, size int64) (*TempPutStream, er
 
 // 实现write接口
 func (t *TempPutStream) Write(p []byte) (n int, err error) {
-	req, err := http.NewRequest(http.MethodPost, path.Join("http://", t.Server, "temp", t.UUID), strings.NewReader(string(p)))
+	req, err := http.NewRequest(http.MethodPatch, "http://"+t.Server+"/temp/"+t.UUID, strings.NewReader(string(p)))
 	if err != nil {
 		return 0, err
 	}
@@ -58,12 +57,12 @@ func (t *TempPutStream) Write(p []byte) (n int, err error) {
 }
 
 // true将临时对象转正
-func (t *TempPutStream) Coommit(positive bool) {
+func (t *TempPutStream) Commit(toFormal bool) {
 	method := http.MethodDelete
-	if positive {
+	if toFormal {
 		method = http.MethodPut
 	}
-	req, _ := http.NewRequest(method, path.Join("http://", t.Server, "temp", t.UUID), nil)
+	req, _ := http.NewRequest(method, "http://"+t.Server+"/temp/"+t.UUID, nil)
 	cli := http.Client{}
 	cli.Do(req)
 }

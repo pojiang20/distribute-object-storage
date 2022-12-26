@@ -18,7 +18,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	size := utils.GetSizeFromHeader(r.Header)
-	respCode, err := storeObject(r.Body, url.PathEscape(hash), size)
+	respCode, err := storeObject(r.Body, hash, size)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(respCode)
@@ -48,7 +48,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	meta, err := es.GetMetadatta(name, version)
+	meta, err := es.GetMetadata(name, version)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

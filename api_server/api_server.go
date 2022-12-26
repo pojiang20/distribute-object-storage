@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Llongfile | log.LstdFlags)
 	go heartbeat.ListenHeartbeat()
 	http.HandleFunc("/objects/", objects.Handler)
 	http.HandleFunc("/locate/", locate.Handler)

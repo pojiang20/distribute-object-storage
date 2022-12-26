@@ -22,10 +22,11 @@ func New(s string) *RabbitMQ {
 	q, err := ch.QueueDeclare("", false, true, false, false, nil)
 	err_utils.Panic_NonNilErr(err)
 
-	mq := new(RabbitMQ)
-	mq.channel = ch
-	mq.Name = q.Name
-	return mq
+	tmp := &RabbitMQ{
+		channel: ch,
+		Name:    q.Name,
+	}
+	return tmp
 }
 
 // 当前队列与exchange绑定
@@ -49,12 +50,12 @@ func (q *RabbitMQ) Send(queueName string, msgBody interface{}) {
 
 // 消息发送给所有绑定了该exchange的队列
 func (q *RabbitMQ) Publish(exchangeName string, msgBody interface{}) {
-	str, err := json.Marshal(msgBody)
+	msgJson, err := json.Marshal(msgBody)
 	err_utils.Panic_NonNilErr(err)
 	err = q.channel.Publish(exchangeName, "", false, false,
 		amqp.Publishing{
 			ReplyTo: q.Name,
-			Body:    []byte(str),
+			Body:    msgJson,
 		})
 	err_utils.Panic_NonNilErr(err)
 }

@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Llongfile | log.LstdFlags)
 	go heartbeat.StartHeartbeat()
 	go locate.ListenLocate()
 	go temp.CleanEvery12hour()

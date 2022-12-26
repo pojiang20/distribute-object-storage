@@ -7,6 +7,7 @@ import (
 	"github.com/pojiang20/distribute-object-storage/src/object_stream"
 	"github.com/pojiang20/distribute-object-storage/src/utils"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -27,11 +28,11 @@ func storeObject(reader io.Reader, hash string, size int64) (int, error) {
 	r := io.TeeReader(reader, stream)
 	actualHash := utils.CalculateHash(r)
 	if actualHash != hash {
-		stream.Coommit(false)
+		stream.Commit(false)
 		err = fmt.Errorf("Error: object hash value is not match, actualHash=[%s], expectedHash=[%s]\n", actualHash, hash)
 		return http.StatusBadRequest, err
 	}
-	stream.Coommit(true)
+	stream.Commit(true)
 	return http.StatusOK, nil
 }
 
@@ -40,6 +41,7 @@ func putStream(hash string, size int64) (*object_stream.TempPutStream, error) {
 	if server == "" {
 		return nil, fmt.Errorf("cannot find any dataServer")
 	}
+	log.Printf("putStream choose %s server\n", server)
 	return object_stream.NewTempPutStream(server, hash, size)
 }
 

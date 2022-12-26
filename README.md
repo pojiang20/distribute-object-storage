@@ -53,26 +53,27 @@ mkdir /tmp/objects
 brew install rabbitmq
 打开`cd /usr/local/Cellar/rabbitmq/版本号/sbin/`，运行`rabbitmq-server`启动服务
 开启插件 `./rabbitmq-plugins enable rabbitmq_management`(关闭插件 `sudo ./rabbitmq-plugins disable rabbitmq_management`)，输入` http://localhost:15672/#/ `登录即可。
-可以在网页中添加exchange
+可以在网页中添加exchanges
 
 添加用户并配置权限
-sudo ./rabbitmqctl add_user test test
-sudo ./rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+`sudo ./rabbitmqctl add_user test test`
+`sudo ./rabbitmqctl set_permissions -p / test ".*" ".*" ".*"`
 
+配置环境变量`export RABBITMQ_SERVER=amqp://test:test@localhost:5672`
+
+mac中也可以使用homebrew直接启动`brew services start rabbitmq`
 
 #### 测试
-for i in `seq 1 6`; do sudo ifconfig en0 alias 10.29.1.$i/16 255.255.255.0; done
-
+开启多个ip地址 ``for i in `seq 1 6`; do sudo ifconfig lo0 alias 10.29.1.$i/16 255.255.255.0; done``
 可以通过 `ping 10.29.1.2` 来检测
-sudo ifconfig en0 -alias 10.29.1.1 可以删除别名
+`sudo ifconfig lo0 -alias 10.29.1.1` 可以删除别名
 
-cd /tmp/stg
 创建文件 for i in `seq 1 6`; do mkdir -p /tmp/stg/$i/objects; done
 
 export RABBITMQ_SERVER=amqp://test:test@localhost:5672
 for i in `seq 1 6`; do LISTEN_ADDRESS=10.29.1.$i:12345 STORAGE_ROOT=/tmp/stg/$i go run ./data_server/data_server.go &; done
 
-for i in `seq 1 2`; do sudo ifconfig en0 alias 10.29.2.$i/16 255.255.255.0; done
+for i in `seq 1 2`; do sudo ifconfig lo0 alias 10.29.2.$i/16 255.255.255.0; done
 for i in `seq 1 2`; do LISTEN_ADDRESS=10.29.2.$i:12345 go run ./api_server/api_server.go &; done
 
 curl -v http://10.29.2.2:12345/objects/test2 -XPUT -d "this is object test2"
@@ -88,20 +89,42 @@ apiServer端也不会收到影响。
 
 ### 第三章
 本章添加了元数据来对对象进行版本管理，apiServer部分提供的接口进行相关操作也都需要向元数据数据库中读、写，dataServer不受影响但是是以元数据中获得对象的散列值作为对象名来读取对象。
-
+#### es安装
+`brew tap elastic/tap`、`brew install elastic/tap/elasticsearch-full`即可安装最新的elasticsearch
+`brew services start elasticsearch-full`执行
+```shell
+# 建立索引
+curl -XPUT localhost:9200/metadata -H 'Content-Type:application/json' -d '{
+  "mappings": {
+    "properties": {
+      "name": {"type": "keyword"},
+      "version": {"type": "integer"},
+      "size": {"type": "integer"},
+      "hash": {"type": "keyword"}
+    }
+  }
+}'
+```
+输入`localhost:9200/metadata`可以看到elasticsearch相关数据
+`export ES_SERVER=localhost:9200`配置环境变量
 #### 测试
+创建temp文件，``for i in `seq 1 6`; do mkdir -p /tmp/stg/$i/temp; done``
 ```shell script
-curl -v 192.168.0.108:12345/objects/test -XPUT -d "This is object content version-1" -H "Digest: SHA-256=9AimTha2kCISf8bVfi1jPXo2BzY="
+curl -v 10.29.2.2:12345/objects/test -XPUT -d "This is object content version-1" -H "Digest: SHA-256=9AimTha2kCISf8bVfi1jPXo2BzY="
 ```
 ```shell script
-curl -v 192.168.0.108:12345/locate/SoxiAi+lEo63eTZ6rc62tzw8kSA=
+curl -v 10.29.2.2:12345/locate/SoxiAi+lEo63eTZ6rc62tzw8kSA=
 ```
 ```shell script
 # 查看对象名为test的所有版本的元数据信息
-curl -v 192.168.0.108:12345/objects/test
+curl -v 10.29.2.2:12345/objects/test
 # 查看对象名为test的指定版本的元数据信息，注意携带的参数的问号要转义
-curl -v 192.168.0.108:12345/objects/test\?version
+curl -v 10.29.2.2:12345/objects/test\?version
 ```
 ```shell script
 curl -v 192.168.0.108:12345/objects/test -XDELETE
 ```
+
+### 第四章
+
+#### 测试
