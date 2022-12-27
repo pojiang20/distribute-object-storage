@@ -47,7 +47,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 // $STORAGE_ROOT/temp/下创建名为<uuid>的文件，将tempInfo编码后存储，来保存临时对象信息
 func (t *tempInfo) writeToFile() error {
 	path1 := path.Join(os.Getenv("STORAGE_ROOT"), "temp", t.UUID)
-	log.Printf("write temp object to [%s]", path1)
+	log.Printf("[%s]: %+v", path1, t)
 	f, err := os.Create(path1)
 	if err != nil {
 		return err

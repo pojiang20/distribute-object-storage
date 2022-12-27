@@ -45,8 +45,8 @@ func patch(w http.ResponseWriter, r *http.Request) {
 	}
 	actualSize := info.Size()
 	if actualSize != tempinfo.Size {
-		//os.Remove(datFile)
-		//os.Remove(infoFile)
+		os.Remove(datFile)
+		os.Remove(infoFile)
 		log.Printf("acutal size %d,not equal %d\n", actualSize, tempinfo.Size)
 		w.WriteHeader(http.StatusInternalServerError)
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -33,6 +34,7 @@ func NewTempPutStream(server, objectName string, size int64) (*TempPutStream, er
 		return nil, err
 	}
 
+	log.Printf("NewTempPutStream get response uuid [%s]\n", string(uuidBytes))
 	return &TempPutStream{
 		Server: server,
 		UUID:   string(uuidBytes),

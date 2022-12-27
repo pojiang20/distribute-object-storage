@@ -37,11 +37,11 @@ func put(w http.ResponseWriter, r *http.Request) {
 
 func get(w http.ResponseWriter, r *http.Request) {
 	name := utils.GetObjectName(r.URL.EscapedPath())
-	versionId := r.URL.Query()["version"]
+	versionId := r.URL.Query().Get("version")
 	version := 0
 	var err error
 	if len(versionId) != 0 {
-		version, err = strconv.Atoi(versionId[0])
+		version, err = strconv.Atoi(versionId)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusBadRequest)

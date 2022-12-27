@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/pojiang20/distribute-object-storage/api_server/objects"
 	"github.com/pojiang20/distribute-object-storage/data_server/heartbeat"
 	"github.com/pojiang20/distribute-object-storage/data_server/locate"
+	"github.com/pojiang20/distribute-object-storage/data_server/objects"
 	"github.com/pojiang20/distribute-object-storage/data_server/temp"
 	"log"
 	"net/http"

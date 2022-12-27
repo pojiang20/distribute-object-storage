@@ -1,3 +1,7 @@
+# brew启动es和rabbitmq
+brew services start elasticsearch-full
+brew services start rabbitmq
+
 # 设置文件
 for i in `seq 1 6`; do mkdir -p /tmp/stg/$i/objects; done
 for i in `seq 1 6`; do mkdir -p /tmp/stg/$i/temp; done

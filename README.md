@@ -112,17 +112,74 @@ curl -XPUT localhost:9200/metadata -H 'Content-Type:application/json' -d '{
 ```shell script
 curl -v 10.29.2.2:12345/objects/test -XPUT -d "This is object content version-1" -H "Digest: SHA-256=9AimTha2kCISf8bVfi1jPXo2BzY="
 ```
-```shell script
-curl -v 10.29.2.2:12345/locate/SoxiAi+lEo63eTZ6rc62tzw8kSA=
+可以看到如下结果
+```text
+☁  stg  curl -v http://10.29.2.2:12345/objects/test -XPUT -d "This is object content version-1" -H "Digest: SHA-256=DrkE6D0mP4aGOU37mPqUrpauEk5LRso0LBt6jnwISv0="
+*   Trying 10.29.2.2:12345...
+* Connected to 10.29.2.2 (10.29.2.2) port 12345 (#0)
+> PUT /objects/test HTTP/1.1
+> Host: 10.29.2.2:12345
+> User-Agent: curl/7.77.0
+> Accept: */*
+> Digest: SHA-256=DrkE6D0mP4aGOU37mPqUrpauEk5LRso0LBt6jnwISv0=
+> Content-Length: 32
+> Content-Type: application/x-www-form-urlencoded
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Mon, 26 Dec 2022 16:05:42 GMT
+< Content-Length: 0
+< 
+* Connection #0 to host 10.29.2.2 left intact
 ```
+定位测试
+```shell script
+☁  stg  curl -v 10.29.2.2:12345/locate/DrkE6D0mP4aGOU37mPqUrpauEk5LRso0LBt6jnwISv0= 
+*   Trying 10.29.2.2:12345...
+* Connected to 10.29.2.2 (10.29.2.2) port 12345 (#0)
+> GET /locate/DrkE6D0mP4aGOU37mPqUrpauEk5LRso0LBt6jnwISv0= HTTP/1.1
+> Host: 10.29.2.2:12345
+> User-Agent: curl/7.77.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Mon, 26 Dec 2022 16:07:45 GMT
+< Content-Length: 17
+< Content-Type: text/plain; charset=utf-8
+< 
+* Connection #0 to host 10.29.2.2 left intact
+"10.29.1.2:12345"%    
+```
+获取对象
+```shell
+☁  stg  curl -v 10.29.2.2:12345/objects/test
+*   Trying 10.29.2.2:12345...
+* Connected to 10.29.2.2 (10.29.2.2) port 12345 (#0)
+> GET /objects/test HTTP/1.1
+> Host: 10.29.2.2:12345
+> User-Agent: curl/7.77.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Tue, 27 Dec 2022 02:54:32 GMT
+< Content-Length: 32
+< Content-Type: text/plain; charset=utf-8
+< 
+* Connection #0 to host 10.29.2.2 left intact
+This is object content version-1%
+```
+
 ```shell script
 # 查看对象名为test的所有版本的元数据信息
 curl -v 10.29.2.2:12345/objects/test
 # 查看对象名为test的指定版本的元数据信息，注意携带的参数的问号要转义
 curl -v 10.29.2.2:12345/objects/test\?version
 ```
+curl -v 10.29.2.2:12345/objects/DrkE6D0mP4aGOU37mPqUrpauEk5LRso0LBt6jnwISv0=
 ```shell script
-curl -v 192.168.0.108:12345/objects/test -XDELETE
+curl -v 10.29.2.2:12345/objects/test -XDELETE
 ```
 
 ### 第四章
