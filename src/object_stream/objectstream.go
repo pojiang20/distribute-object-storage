@@ -1,4 +1,4 @@
-package objects
+package object_stream
 
 import (
 	"fmt"

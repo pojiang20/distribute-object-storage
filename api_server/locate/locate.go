@@ -3,11 +3,11 @@ package locate
 import (
 	"encoding/json"
 	"github.com/pojiang20/distribute-object-storage/src/rabbitmq"
+	"github.com/pojiang20/distribute-object-storage/src/rs"
+	"github.com/pojiang20/distribute-object-storage/src/types"
 	"github.com/pojiang20/distribute-object-storage/src/utils"
-	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -27,10 +27,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Exist(name string) bool {
-	return Locate(name) != ""
+	//RS码规则：当获取的分片大于等于数据分片的值时，则可以进行数据恢复。这种情况认为可以定位到该数据
+	return len(Locate(name)) >= rs.DATA_SHARDS
 }
 
-func Locate(name string) string {
+func Locate(name string) (locateInfo map[int]string) {
 	mq := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
 	//向交换机发布消息
 	mq.Publish("dataServers", name)
@@ -41,12 +42,15 @@ func Locate(name string) string {
 		time.Sleep(time.Second)
 		mq.Close()
 	}()
-	msg := <-c
-	res, _ := strconv.Unquote(string(msg.Body))
-	if res != "" {
-		log.Printf("INFO: object [%s] at server '%s'\n", name, res)
-	} else {
-		log.Printf("INFO: object [%s] not found\n", name)
+	locateInfo = make(map[int]string)
+	for i := 0; i < rs.ALL_SHARDS; i++ {
+		msg := <-c
+		if len(msg.Body) == 0 {
+			return
+		}
+		var info types.LocateMessage
+		json.Unmarshal(msg.Body, &info)
+		locateInfo[info.ID] = info.Addr
 	}
-	return res
+	return
 }

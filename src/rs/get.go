@@ -2,7 +2,6 @@ package rs
 
 import (
 	"fmt"
-	"github.com/pojiang20/distribute-object-storage/api_server/objects"
 	"github.com/pojiang20/distribute-object-storage/src/object_stream"
 	"io"
 )
@@ -25,7 +24,7 @@ func NewRSGetStream(locateInfo map[int]string, dataServers []string, hash string
 			dataServers = dataServers[1:]
 			//否则，创建分片编号对应的读对象
 		} else {
-			reader, err := objects.NewGetStream(server, fmt.Sprintf("%s.%d", hash, i))
+			reader, err := object_stream.NewGetStream(server, fmt.Sprintf("%s.%d", hash, i))
 			if err == nil {
 				readers[i] = reader
 			}
