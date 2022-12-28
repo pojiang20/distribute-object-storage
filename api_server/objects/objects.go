@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pojiang20/distribute-object-storage/api_server/heartbeat"
 	"github.com/pojiang20/distribute-object-storage/api_server/locate"
-	"github.com/pojiang20/distribute-object-storage/src/object_stream"
+	"github.com/pojiang20/distribute-object-storage/src/rs"
 	"github.com/pojiang20/distribute-object-storage/src/utils"
 	"io"
 	"log"
@@ -36,19 +36,26 @@ func storeObject(reader io.Reader, hash string, size int64) (int, error) {
 	return http.StatusOK, nil
 }
 
-func putStream(hash string, size int64) (*object_stream.TempPutStream, error) {
-	server := heartbeat.ChooseRandomDataServer()
-	if server == "" {
-		return nil, fmt.Errorf("cannot find any dataServer")
+func putStream(hash string, size int64) (*rs.RSPutStream, error) {
+	servers := heartbeat.ChooseServers(rs.ALL_SHARDS, nil)
+	if len(servers) != rs.ALL_SHARDS {
+		return nil, fmt.Errorf("apiServer Error: cannot find enough dataServers\n")
 	}
-	log.Printf("putStream choose %s server\n", server)
-	return object_stream.NewTempPutStream(server, hash, size)
+	log.Printf("apiServer INFO: Choose random data servers to save object %s: %v\n", hash, servers)
+	return rs.NewRSPutStream(servers, hash, size)
 }
 
-func getStream(object string) (io.Reader, error) {
-	server := locate.Locate(object)
-	if server == "" {
-		return nil, fmt.Errorf("object %s locate fail", object)
+func GetStream(objectName string, size int64) (*rs.RSGetStream, error) {
+	locateInfo := locate.Locate(objectName)
+	if len(locateInfo) < rs.DATA_SHARDS {
+		return nil, fmt.Errorf("Error: object %s locate failed, the data shards located is not enough: %v\n",
+			objectName, locateInfo)
 	}
-	return NewGetStream(server, object)
+	//若是获取的对象分片不足，说明需要修复
+	dataServers := make([]string, 0)
+	if len(locateInfo) < rs.ALL_SHARDS {
+		log.Printf("INFO: some of shards need to repair\n")
+		dataServers = heartbeat.ChooseServers(rs.ALL_SHARDS-len(locateInfo), locateInfo)
+	}
+	return rs.NewRSGetStream(locateInfo, dataServers, objectName, size)
 }

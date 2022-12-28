@@ -58,14 +58,20 @@ func get(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	object := url.PathEscape(meta.Hash)
-	stream, err := getStream(object)
+	stream, err := GetStream(url.PathEscape(meta.Hash), meta.Size)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	io.Copy(w, stream)
+
+	_, err = io.Copy(w, stream)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	stream.Close()
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
