@@ -13,6 +13,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		post(w, r)
 	case http.MethodDelete:
 		del(w, r)
+	case http.MethodHead:
+		head(w, r)
+	case http.MethodGet:
+		get(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
