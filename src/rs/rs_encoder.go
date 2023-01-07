@@ -7,7 +7,7 @@ import (
 
 // 先写入到cache中，当数据量为BLOCK_SIZE时再写入到指定位置
 type rsEncoder struct {
-	writers  []io.Writer //见对象分片数据写入到指定的储存位置
+	writers  []io.Writer //将对象分片数据写入到指定的储存位置
 	rsEncode reedsolomon.Encoder
 	cache    []byte //缓存待写入的数据，大小一般为BLOCK_SIZE，一次性可写入ALL_SHARDS个切片数据
 }

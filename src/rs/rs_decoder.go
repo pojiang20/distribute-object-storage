@@ -46,7 +46,7 @@ func (rsdec *rsDecoder) Read(p []byte) (n int, err error) {
 	return dataLen, nil
 }
 
-// 解码与修复
+// 解码与修复，将数据恢复到cache
 func (rsDec *rsDecoder) getData() error {
 	if rsDec.total == rsDec.size {
 		return io.EOF
@@ -54,7 +54,7 @@ func (rsDec *rsDecoder) getData() error {
 
 	shards := make([][]byte, ALL_SHARDS)
 	repairIds := make([]int, 0)
-	for i := 0; i < len(shards); i++ {
+	for i := 0; i < ALL_SHARDS; i++ {
 		if rsDec.readers[i] == nil {
 			repairIds = append(repairIds, i)
 		} else {
@@ -63,6 +63,7 @@ func (rsDec *rsDecoder) getData() error {
 			if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
 				shards[i] = nil
 			} else if readCount != BLOCK_PER_SHARD {
+				//去除readCount~BLOCK_PER_SHARD的内容
 				shards[i] = shards[i][:readCount]
 			}
 		}

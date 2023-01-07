@@ -27,7 +27,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Exist(name string) bool {
-	//RS码规则：当获取的分片大于等于数据分片的值时，则可以进行数据恢复。这种情况认为可以定位到该数据
+	//【RS码规则】当获取的分片大于等于数据分片的值时，则可以进行数据恢复。这种情况认为可以定位到该数据
 	return len(Locate(name)) >= rs.DATA_SHARDS
 }
 
@@ -37,7 +37,7 @@ func Locate(name string) (locateInfo map[int]string) {
 	mq.Publish("dataServers", name)
 	c := mq.Consume()
 
-	//TODO 这个是做什么的？publish()后，设置超时关闭连接，以判断资源是否存在
+	//publish()后，设置超时关闭连接，以判断资源是否存在
 	go func() {
 		time.Sleep(time.Second)
 		mq.Close()

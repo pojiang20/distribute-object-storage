@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	//map[对象hash]=分片id
 	objectMap = make(map[string]int)
 	lock      sync.Mutex
 )
@@ -48,7 +49,7 @@ func Del(hash string) {
 func ListenLocate() {
 	mq := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
 	defer mq.Close()
-	//绑定名为dataServers的交换器
+	//绑定名为dataServers的交换器，接收来自apiServer的请求
 	mq.BindExchange("dataServers")
 	//获取相应的channel
 	c := mq.Consume()

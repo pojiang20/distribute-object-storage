@@ -69,9 +69,9 @@ func ChooseRandomDataServer() string {
 	return servers[rand.Intn(n)]
 }
 
-// ChooseServers: 选取dataServersNum个数据服务节点用于存放分片数据，该函数有两种使用方式：
-// 1. 第一次存储对象分片数据，则dataServersNum等于ALL_SHARDS，unbrokenShardServerMap为nil
-// 2. 从可用的数据服务节点中排除对象分片数据正常的节点，获取可用于存储修复的分片数据的数据服务节点
+// ChooseServers: 需要返回一组存放多个分片的servers，其数量为dataServerNum，该函数有两种使用场景：
+// 1. 第一次存储对象分片数据，则dataServersNum等于ALL_SHARDS，unbrokenShardServerMap为nil，即均匀地将分片存放到各个服务节点
+// 2. 获取可用于存储修复的分片数据的数据服务节点，从可用的数据服务节点中排除对象分片数据正常的节点
 func ChooseServers(dataServerNum int, unbrokenShardServerMap map[int]string) (dataServers []string) {
 	// 所需的用于存储的分片的节点数与已存放正常分片数据的节点数之和应等于一个对象的分片数之和，否则应直接中断程序执行
 	if dataServerNum+len(unbrokenShardServerMap) != rs.ALL_SHARDS {
@@ -94,7 +94,7 @@ func ChooseServers(dataServerNum int, unbrokenShardServerMap map[int]string) (da
 	if len(candidates) < dataServerNum {
 		return
 	}
-	//打乱并随机选择所需的数目
+	//打乱并随机选择所需的数目(对candidate存放的内容洗牌)
 	randomIds := rand.Perm(len(candidates))
 	for i := 0; i < dataServerNum; i++ {
 		dataServers = append(dataServers, candidates[randomIds[i]])

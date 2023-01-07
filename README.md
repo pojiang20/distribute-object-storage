@@ -185,3 +185,102 @@ curl -v 10.29.2.2:12345/objects/test -XDELETE
 ### 第四章
 
 #### 测试
+
+### 第五章
+
+#### 测试效果
+
+发送请求和响应，响应200表示存储成功
+```text
+curl -v 10.29.2.2:12345/objects/test5 -XPUT -d "this object will be seperated to 4+2" -H "Digest: SHA-256=2MRHhgqkvILs04RzLIEpZBzpgos/9QlNKRXEh7cMngY="
+*   Trying 10.29.2.2:12345...
+* Connected to 10.29.2.2 (10.29.2.2) port 12345 (#0)
+> PUT /objects/test5 HTTP/1.1
+> Host: 10.29.2.2:12345
+> User-Agent: curl/7.77.0
+> Accept: */*
+> Digest: SHA-256=2MRHhgqkvILs04RzLIEpZBzpgos/9QlNKRXEh7cMngY=
+> Content-Length: 36
+> Content-Type: application/x-www-form-urlencoded
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Sat, 07 Jan 2023 04:56:45 GMT
+< Content-Length: 0
+< 
+* Connection #0 to host 10.29.2.2 left intact
+```
+查看存储情况
+```text
+.
+├── 1
+│   ├── objects
+│   │   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.4.3bG4EYy18vq+9JU%2F0vzbeRxDjFglFg2OBa26TlEt8gA=
+│   └── temp
+├── 2
+│   ├── objects
+│   │   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.2.syDfa6hGt2PmnadawXz8SSr2zaalOCW6zCT3Ky7BcW4=
+│   └── temp
+├── 3
+│   ├── objects
+│   │   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.1.S8JnDgiwWnfNud06pGE+%2FEHgmBzNpFAEg6s%2FgR0J4Cw=
+│   └── temp
+├── 4
+│   ├── objects
+│   │   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.0.%2FQbxVU4EOPqz%2F2DYStzA19gOT5KBh2eEeuktmV3NFgY=
+│   └── temp
+├── 5
+│   ├── objects
+│   │   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.3.0aX0oLlWMm02ane45F2KxC79KTwjBUmuh1GwXcfRqH4=
+│   └── temp
+└── 6
+    ├── objects
+    │   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.5.5GrT1Vp7C1sI4V5brEWSJ+heWjWxDpJvVE75nVY8bdk=
+    └── temp
+
+```
+查看对象
+```text
+curl 10.29.2.1:12345/objects/test5
+this object will be seperated to 4+2%                                                   
+```
+
+删除和修改
+```text
+rm /tmp/stg/1/objects/2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.4.3bG4EYy18vq+9JU%2F0vzbeRxDjFglFg2OBa26TlEt8gA=
+echo errMsg > /tmp/stg/4/objects/2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.0.%2FQbxVU4EOPqz%2F2DYStzA19gOT5KBh2eEeuktmV3NFgY=
+
+☁  stg  tree ./1        
+./1
+├── objects
+└── temp
+```
+再次查看对象，可以获取信息，并且删除和修改的文件得到了修复。
+```text
+☁  stg  tree ./1
+./1
+├── objects
+│   └── 2MRHhgqkvILs04RzLIEpZBzpgos%2F9QlNKRXEh7cMngY=.4.S8JnDgiwWnfNud06pGE+%2FEHgmBzNpFAEg6s%2FgR0J4Cw=
+└── temp
+```
+删除2个以上的文件
+```text
+rm [1-3]/objects/*
+```
+再次请求则返回404
+```text
+☁  distribute-object-storage [dev] ⚡  curl -v 10.29.2.1:12345/objects/test5
+*   Trying 10.29.2.1:12345...
+* Connected to 10.29.2.1 (10.29.2.1) port 12345 (#0)
+> GET /objects/test5 HTTP/1.1
+> Host: 10.29.2.1:12345
+> User-Agent: curl/7.77.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 404 Not Found
+< Date: Sat, 07 Jan 2023 05:10:01 GMT
+< Content-Length: 0
+< 
+* Connection #0 to host 10.29.2.1 left intact
+```
