@@ -62,3 +62,7 @@ func NewGetStream(server, object string) (*GetStream, error) {
 func (g *GetStream) Read(p []byte) (n int, err error) {
 	return g.reader.Read(p)
 }
+
+func NewTempGetStream(server, uuid string) (*GetStream, error) {
+	return newGetStream("http://" + server + "/temp/" + uuid)
+}

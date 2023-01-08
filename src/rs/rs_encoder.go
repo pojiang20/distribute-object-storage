@@ -42,7 +42,7 @@ func (rsEnc *rsEncoder) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-// 写入缓存
+// 将cache缓存中的内容，写入到对应的数据节点中
 func (rsEnc *rsEncoder) Flush() {
 	if len(rsEnc.cache) == 0 {
 		return

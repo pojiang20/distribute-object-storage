@@ -6,18 +6,17 @@ import (
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	m := r.Method
-
-	if m == http.MethodPut {
+	switch m {
+	case http.MethodPut:
 		put(w, r)
-		return
-	}
-	if m == http.MethodGet {
+	case http.MethodPost:
+		post(w, r)
+	case http.MethodGet:
 		get(w, r)
-		return
-	}
-	if m == http.MethodDelete {
+	case http.MethodDelete:
 		del(w, r)
-		return
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	return
 }
