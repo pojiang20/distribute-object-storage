@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pojiang20/distribute-object-storage/src/object_stream"
 	"io"
+	"log"
 )
 
 type RSGetStream struct {
@@ -53,4 +54,28 @@ func (s *RSGetStream) Close() {
 			s.writers[i].(*object_stream.TempPutStream).Commit(true)
 		}
 	}
+}
+
+// whence:何处
+// 从whence（何处）开始要跳过offset字节
+func (s *RSGetStream) Seek(offset int64, whence int) (int64, error) {
+	//只支持从当前位置起跳
+	if whence != io.SeekCurrent {
+		log.Fatalln("Fatal: only support SeekCurrent")
+	}
+	//负数不能跳
+	if offset < 0 {
+		log.Fatalln("Fatal: offset should >=0")
+	}
+	//每次读取BLOCK_SIZE大小的内容并丢弃
+	for offset != 0 {
+		length := int64(BLOCK_SIZE)
+		if length > offset {
+			length = offset
+		}
+		buff := make([]byte, length)
+		io.ReadFull(s, buff)
+		offset -= length
+	}
+	return offset, nil
 }
